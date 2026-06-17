@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A premium real-time dashboard to monitor Google Cloud BigQuery Release Notes, filter by category, search updates, and share features directly to Twitter.">
+    <title>BigQuery Release Hub & Sharing Tool</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation / Logo Header -->
+        <header class="main-header">
+            <div class="header-branding">
+                <div class="logo-container">
+                    <svg class="bq-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2005/Atom">
+                        <path d="M12 2L2 22h20L12 2z" fill="url(#bq-gradient)" />
+                        <path d="M12 6L4.5 20h15L12 6z" fill="#0b0f19" />
+                        <circle cx="12" cy="14" r="3" fill="#FFB300" />
+                        <defs>
+                            <linearGradient id="bq-gradient" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#4285F4" />
+                                <stop offset="100%" stop-color="#34A853" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="header-titles">
+                    <h1 id="app-main-title">BigQuery Release Hub</h1>
+                    <p class="subtitle">Real-time Google Cloud BigQuery Release Notes & Sharing Console</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="stats-mini" id="quick-stats-container">
+                    <span class="stat-pill"><span class="stat-num" id="stat-all">0</span> Total</span>
+                    <span class="stat-pill feature"><span class="stat-num" id="stat-features">0</span> Features</span>
+                    <span class="stat-pill deprecation"><span class="stat-num" id="stat-deprecations">0</span> Deprecations</span>
+                </div>
+                <button id="btn-refresh" class="btn btn-primary" title="Refresh Release Notes">
+                    <svg class="icon spinner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    <span>Refresh Feed</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sub-Header: Search and Category Filtering -->
+        <section class="control-panel">
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="search-input" placeholder="Search keywords, features, functions..." aria-label="Search release notes">
+            </div>
+
+            <div class="category-filters" id="category-filter-group">
+                <button class="filter-pill active" data-type="all">All Updates</button>
+                <button class="filter-pill" data-type="feature">Features</button>
+                <button class="filter-pill" data-type="deprecation">Deprecations</button>
+                <button class="filter-pill" data-type="issue">Issues & Fixes</button>
+                <button class="filter-pill" data-type="announcement">Announcements</button>
+            </div>
+        </section>
+
+        <!-- Main Workspace: Feed + Tweet Sandbox -->
+        <main class="workspace-grid">
+            <!-- Left Side: Feed of Release Notes -->
+            <section class="feed-section" id="releases-feed-section">
+                <!-- Status & Error Alert Container -->
+                <div id="alert-banner" class="alert-container hidden"></div>
+                
+                <!-- Release Notes Container -->
+                <div class="feed-timeline" id="feed-timeline">
+                    <!-- Loading Skeleton (Shown by default) -->
+                    <div class="skeleton-card-container" id="skeleton-loader">
+                        <div class="skeleton-card">
+                            <div class="skeleton-header">
+                                <div class="skeleton-badge"></div>
+                                <div class="skeleton-date"></div>
+                            </div>
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line"></div>
+                        </div>
+                        <div class="skeleton-card">
+                            <div class="skeleton-header">
+                                <div class="skeleton-badge"></div>
+                                <div class="skeleton-date"></div>
+                            </div>
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-line"></div>
+                        </div>
+                        <div class="skeleton-card">
+                            <div class="skeleton-header">
+                                <div class="skeleton-badge"></div>
+                                <div class="skeleton-date"></div>
+                            </div>
+                            <div class="skeleton-line short"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dinamically injected cards go here -->
+                    <div id="feed-cards" class="feed-cards-container"></div>
+                </div>
+            </section>
+
+            <!-- Right Side: Tweet Composer Sandbox (Sticky Desktop) -->
+            <aside class="composer-sidebar" id="composer-sticky-sidebar">
+                <div class="composer-card">
+                    <div class="composer-header">
+                        <div class="composer-title-wrapper">
+                            <svg class="x-logo" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                            <h2>Tweet Composer</h2>
+                        </div>
+                        <span id="char-counter" class="char-counter">0 / 280</span>
+                    </div>
+
+                    <!-- Composer Active State -->
+                    <div class="composer-active-state hidden" id="composer-active">
+                        <div class="composer-meta">
+                            <div class="selected-details">
+                                <span class="selected-badge" id="composer-selected-badge">Feature</span>
+                                <span class="selected-date" id="composer-selected-date">June 17, 2026</span>
+                            </div>
+                            <div class="template-selector">
+                                <label for="tweet-template">Template Pattern:</label>
+                                <select id="tweet-template" aria-label="Select Tweet Template">
+                                    <option value="excited">🚀 Feature Drop (Emoji-rich)</option>
+                                    <option value="professional">💼 Professional/Tech Summary</option>
+                                    <option value="short">⚡ Quick Update (Concise)</option>
+                                    <option value="custom">✍️ Freeform Custom Text</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Tweet Preview Box -->
+                        <div class="twitter-preview-box">
+                            <div class="twitter-profile">
+                                <div class="profile-pic">BQ</div>
+                                <div class="profile-names">
+                                    <span class="profile-display">BigQuery Release Hub</span>
+                                    <span class="profile-handle">@BQReleaseHub</span>
+                                </div>
+                            </div>
+                            <div class="tweet-editable-wrapper">
+                                <textarea id="tweet-textarea" placeholder="What's happening?" aria-label="Tweet editor text area"></textarea>
+                            </div>
+                            <div class="tweet-link-preview" id="tweet-url-preview">
+                                <div class="link-preview-text">
+                                    <span class="link-source">cloud.google.com</span>
+                                    <span class="link-title" id="preview-link-title">BigQuery Release Notes</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="composer-footer">
+                            <button id="btn-tweet-action" class="btn btn-tweet">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                                <span>Share to X / Twitter</span>
+                            </button>
+                            <button id="btn-cancel-compose" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- Composer Empty/Placeholder State -->
+                    <div class="composer-placeholder-state" id="composer-placeholder">
+                        <div class="placeholder-icon-wrapper">
+                            <svg class="placeholder-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742h.008v.008h-.008v-.008zm.37 3.078a5.978 5.978 0 01-2.99 2.779m2.99-2.779a5.978 5.978 0 002.99-2.778m-2.99 2.778H18m-3 0h.008v.008H15v-.008zm0 2.25h.008v.008H15v-.008zM9 18h.008v.008H9V18zm0 2.25h.008v.008H9v-.008zM12 18h.008v.008H12V18zm0 2.25h.008v.008H12v-.008zm3-2.25h.008v.008H15V18zm0 2.25h.008v.008H15v-.008zm-6-9h.008v.008H9v-.008zm0 2.25h.008v.008H9v-.008zm3-2.25h.008v.008H12v-.008zm0 2.25h.008v.008H12v-.008zm0 2.25h.008v.008H12V18zm3-6h.008v.008H15v-.008zm0 2.25h.008v.008H15v-.008zm3-2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008v-.008z" />
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                            </svg>
+                        </div>
+                        <h3>Select an Update to Tweet</h3>
+                        <p>Click the "Select to Tweet" button on any release note in the feed to customize and preview your post before sharing.</p>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Mobile Sticky Float Button to Open Composer Modal -->
+    <button id="btn-mobile-composer-trigger" class="btn btn-float hidden" title="View Active Tweet Composer">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        <span class="badge-dot" id="composer-mobile-badge-dot"></span>
+    </button>
+
+    <!-- Mobile Composer Modal Overlay -->
+    <div class="modal-overlay hidden" id="mobile-composer-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="btn-close-modal" aria-label="Close modal">&times;</button>
+            <div id="modal-composer-placeholder-target"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>&copy; 2026 BigQuery Release Hub. Powered by Python Flask and Google Cloud Feeds. All paths resolved to <a href="https://docs.cloud.google.com/bigquery/docs/release-notes">Google Cloud Documentation</a>.</p>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
