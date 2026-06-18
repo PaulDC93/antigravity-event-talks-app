@@ -53,6 +53,85 @@
 }
 
 /* ==========================================================================
+   LIGHT MODE VARIABLE OVERRIDES & ADJUSMENTS
+   ========================================================================== */
+body.light-mode {
+    --bg-main: #f8fafc;
+    --bg-surface: #ffffff;
+    --bg-surface-elevated: #f1f5f9;
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --border-color: rgba(15, 23, 42, 0.08);
+    --border-glow: rgba(66, 133, 244, 0.12);
+    
+    /* Text Colors */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    /* Twitter Sandbox Light Colors */
+    --twitter-bg: #f7f9fa;
+    --twitter-blue: #1d9bf0;
+    
+    /* Shadow Overrides */
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+}
+
+/* Light Mode Element Adjustments */
+body.light-mode .header-titles h1 {
+    background: linear-gradient(135deg, #0f172a 30%, var(--gcp-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.light-mode .x-logo {
+    color: #0f172a;
+}
+
+body.light-mode .card-content strong {
+    color: #0f172a;
+}
+
+body.light-mode .card-content code {
+    background-color: rgba(15, 23, 42, 0.05);
+    color: #c2410c;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+body.light-mode .composer-card {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode .btn-secondary {
+    background-color: #ffffff;
+    color: #475569;
+    border: 1px solid rgba(15, 23, 42, 0.15);
+}
+
+body.light-mode .btn-secondary:hover {
+    background-color: #f8fafc;
+    color: #0f172a;
+    border-color: rgba(15, 23, 42, 0.3);
+}
+
+body.light-mode .btn-card-copy {
+    background: #ffffff;
+    color: #475569;
+    border-color: rgba(15, 23, 42, 0.15);
+}
+
+body.light-mode .btn-card-copy:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: rgba(15, 23, 42, 0.3);
+}
+
+body.light-mode .type-badge.update {
+    background-color: rgba(15, 23, 42, 0.05);
+    color: #475569;
+}
+
+/* ==========================================================================
    BASE STYLES & RESET
    ========================================================================== */
 *, *::before, *::after {

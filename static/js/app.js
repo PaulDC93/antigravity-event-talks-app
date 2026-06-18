@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     const btnRefresh = document.getElementById('btn-refresh');
     const btnExportCsv = document.getElementById('btn-export-csv');
+    const btnThemeToggle = document.getElementById('btn-theme-toggle');
+    const themeToggleText = btnThemeToggle.querySelector('.theme-text');
+    const sunIcon = btnThemeToggle.querySelector('.sun-icon');
+    const moonIcon = btnThemeToggle.querySelector('.moon-icon');
     const searchInput = document.getElementById('search-input');
     const categoryFilters = document.getElementById('category-filter-group');
     const feedCards = document.getElementById('feed-cards');
@@ -48,6 +52,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================================
     btnRefresh.addEventListener('click', () => fetchReleases(true));
     btnExportCsv.addEventListener('click', exportToCSV);
+    
+    // Theme toggle click handler
+    btnThemeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        const isLight = document.body.classList.contains('light-mode');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        updateThemeUI(isLight);
+    });
+
+    function updateThemeUI(isLight) {
+        if (isLight) {
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+            themeToggleText.textContent = 'Dark Mode';
+        } else {
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+            themeToggleText.textContent = 'Light Mode';
+        }
+    }
+
+    // Restore saved theme on initial load
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        updateThemeUI(true);
+    }
     
     // Search input (with brief input bounce protection)
     let searchTimeout;
