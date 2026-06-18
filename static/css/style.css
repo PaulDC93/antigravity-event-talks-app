@@ -249,6 +249,27 @@ body {
     border-color: var(--twitter-blue);
 }
 
+.btn-card-copy {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-card-copy:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-card-copy.copied {
+    background: rgba(52, 168, 83, 0.12) !important;
+    color: var(--tag-feature-text) !important;
+    border-color: rgba(52, 168, 83, 0.3) !important;
+}
+
 .btn-float {
     position: fixed;
     bottom: 24px;
